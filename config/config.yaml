@@ -33,6 +33,7 @@ bcftools_filter_exclude: "QUAL < 20.0 || (FORMAT/SP > 60.0 | FORMAT/DP < 5.0 | F
 bcftools_filter_variance_type: 'TYPE="{var_type}"'
 bcftools_filter_zygosity_type: 'FMT/GT="{zygosity}"'
 ploidy_of_ChrX: False
+vcf_subset_after_filtration: True
 # visualization
 number_of_chromosomes: 17
 coverage_stats_window_size_list: [1000, 10000]
