@@ -35,22 +35,24 @@ def get_sex_chromosome_length(lenfile, chr_name):
     return sex_chromosome_length
 
 def main():
-    # get start and stop coordinates (mean values will be returned if they differ)
-    chr_name, start_coordinate, stop_coordinate = get_PAR_coordinates(args.input)
-    # get length of sex chromosome
-    sex_chromosome_length = get_sex_chromosome_length(args.lenfile, chr_name)
-    # get resulting ploidy.file
-    with open(args.output, 'a') as ploidy_outfile:
+    ploidy_outfile = open(args.output, 'a')
+    if len(args.input) != 0: # if you have a list of Male samples
+        # get start and stop coordinates (mean values will be returned if they differ)
+        chr_name, start_coordinate, stop_coordinate = get_PAR_coordinates(args.input)
+        # get length of sex chromosome
+        sex_chromosome_length = get_sex_chromosome_length(args.lenfile, chr_name)
+        # get resulting ploidy.file
         ploidy_outfile.write(f"{chr_name}\t1\t{start_coordinate}\tM\t1\n")
         ploidy_outfile.write(f"{chr_name}\t{stop_coordinate}\t{sex_chromosome_length}\tM\t1\n")
-        # ploidy_outfile.write("*\t*\t*\tM\t2\n")
-        # ploidy_outfile.write("*\t*\t*\tF\t2\n")
+    ploidy_outfile.write("*\t*\t*\tM\t2\n")
+    ploidy_outfile.write("*\t*\t*\tF\t2\n")
+    ploidy_outfile.close()
 
 
 if __name__ == "__main__":
     parser = ArgumentParser()
     group_required = parser.add_argument_group('Required options')
-    group_required.add_argument('-i', '--input', type=str, nargs='+', required=True,
+    group_required.add_argument('-i', '--input', type=str, nargs='*', required=True,
                              help="BED files with PAR coords (space separated list)")
     group_required.add_argument('-l', '--lenfile', type=str, help="assembly.len file")
     group_required.add_argument('-o','--output', type=str, help="output file name")
