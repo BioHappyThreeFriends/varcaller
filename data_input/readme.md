@@ -1,21 +1,7 @@
 Additional information on input data:
 
-- assemblies (reference). 
-    
-    Should be determined in config/default.yaml. Section "sample" (noted as "parameters").
-    
-    Extension is determined in config/default.yaml. Section "assemblies_ext" (noted as "Extensions").
+All data about samples should be just placed into `samples.tsv` file
 
-- reads
-    
-    Extension is determined in config/default.yaml. Section "reads_ext" (noted as "Extensions").
-    
-    Required structure example:
-    
-        └── reads
-            ├── sample1
-                ├── sample1_1.fastq.gz
-                └── sample1_2.fastq.gz
-            ├── sample2
-                ├── sample2_1.fastq.gz
-                └── sample2_2.fastq.gz
+- paths to sample reads files, 
+- sex, and 
+- identificator of sample that would be used in naming of out put files.
