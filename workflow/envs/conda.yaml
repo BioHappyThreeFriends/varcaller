@@ -9,6 +9,7 @@ dependencies:
   - samtools>=1.10
   - mosdepth>=0.3.1
   - bcftools>=1.12
+  - parallel
   - python=3.8
   - pip:
     - "--editable=git+https://github.com/tomarovsky/Biocrutch.git#egg=Biocrutch"

@@ -18,7 +18,8 @@ rule bcftools_varcall:
         min_MQ=config["bcftools_mpileup_min_MQ"],
         min_BQ=config["bcftools_mpileup_min_BQ"],
         samples_file="--samples-file "+str(assembly_stats_dir_path / (ASSEMBLY + ".samples.file")) if ploidy_of_ChrX else '',
-        ploidy_file="--ploidy-file "+str(assembly_stats_dir_path / (ASSEMBLY + ".ploidy.file")) if ploidy_of_ChrX else ''
+        ploidy_file="--ploidy-file "+str(assembly_stats_dir_path / (ASSEMBLY + ".ploidy.file")) if ploidy_of_ChrX else '',
+        tmp_prefix=varcall_dir_path / ("split/" + ASSEMBLY)
     log:
         mpileup=log_dir_path / (ASSEMBLY + "." + PLOIDY + ".bcftools_mpileup.log"),
         call=log_dir_path / (ASSEMBLY + "." + PLOIDY + ".bcftools_call.log"),
@@ -35,11 +36,17 @@ rule bcftools_varcall:
     threads:
         config["bcftools_varcall_threads"]
     shell:
+        "mkdir -p {params.tmp_prefix}/mpileup/ {params.tmp_prefix}/bcf/; "
+        "prepare_region_list.py -r {input.assembly} -s -m 500000 -n 100 -g samtools -x 1000 2>/dev/null | "
+        "parallel -j {threads} '"
         "bcftools mpileup --threads {threads} -d {params.max_depth} -q {params.min_MQ} -Q {params.min_BQ} "
-        "--adjust-MQ {params.adjustMQ} --annotate {params.annotate_mpileup} -Oz "
-        "-f {input.assembly} {input.samples} 2> {log.mpileup} | tee {output.mpileup} | "
+        "--adjust-MQ {params.adjustMQ} --annotate {params.annotate_mpileup} -O u  "
+        "-f {input.assembly} -r {{}} {input.samples} 2> {log.mpileup} | tee {params.tmp_prefix}/mpileup/tmp.{{#}}.mpileup.bcf | "
         "bcftools call {params.samples_file} {params.ploidy_file} "
-        "-Oz -mv --annotate {params.annotate_call} > {output.call} 2> {log.call}"
+        "-m -O u -v -f {params.annotate_call} > {params.tmp_prefix}/bcf/tmp.{{#}}.bcf'; "
+        "bcftools concat -O u --threads 3 `ls {params.tmp_prefix}/bcf/tmp.*.bcf | sort -V` | bcftools view -O z -o {output.call} -; "
+        "bcftools concat -O u --threads 3 `ls {params.tmp_prefix}/mpileup/tmp.*.mpileup.bcf | sort -V` | bcftools view -O z -o {output.mpileup} -; "
+        " 2> {log.call}; rm -r {params.tmp_prefix}; "
 
 
 if config["vcf_subset_after_filtration"]:
